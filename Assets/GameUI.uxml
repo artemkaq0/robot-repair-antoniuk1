@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="HUD" style="flex-grow: 1; padding: 20px;">
+        <!-- Смужка здоров'я -->
+        <ui:VisualElement name="HealthBarBackground" style="width: 200px; height: 25px; background-color: rgba(0, 0, 0, 0.6); border-width: 2px; border-color: rgb(255, 255, 255);">
+            <ui:VisualElement name="HealthBar" style="width: 100%; height: 100%; background-color: rgb(230, 50, 50);" />
+        </ui:VisualElement>
+
+        <!-- Лічильник роботів -->
+        <ui:Label name="CounterLabel" text="Полагоджено: 0 / 0" style="color: rgb(255, 255, 255); font-size: 20px; -unity-font-style: bold; margin-top: 10px;" />
+
+        <!-- Вікно діалогу NPC -->
+        <ui:VisualElement name="NPCDialogue" style="display: none; background-color: rgba(0, 0, 0, 0.85); padding: 15px; margin-top: 20px; border-radius: 8px; max-width: 400px;">
+            <ui:Label name="DialogueLabel" text="Текст..." style="color: rgb(255, 255, 255); font-size: 16px; white-space: normal;" />
+        </ui:VisualElement>
+
+        <!-- Екран Перемоги -->
+        <ui:VisualElement name="WinScreenContainer" style="opacity: 0; position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7);">
+            <ui:Label text="ПЕРЕМОГА!" style="color: rgb(80, 255, 80); font-size: 48px; -unity-font-style: bold;" />
+        </ui:VisualElement>
+
+        <!-- Екран Поразки -->
+        <ui:VisualElement name="LoseScreenContainer" style="opacity: 0; position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.7);">
+            <ui:Label text="ПОРАЗКА!" style="color: rgb(255, 60, 60); font-size: 48px; -unity-font-style: bold;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

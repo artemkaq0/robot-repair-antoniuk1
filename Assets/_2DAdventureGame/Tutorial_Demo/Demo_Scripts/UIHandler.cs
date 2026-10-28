@@ -1,55 +1,49 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace Beginner2D
 {
-    /// <summary>
-    /// Handle the game UI, changing health bar, enemies counter etc.
-    /// </summary>
     public class UIHandler : MonoBehaviour
     {
         public static UIHandler instance { get; private set; }
 
-        public float displayTime = 4.0f;
-        private VisualElement m_NonPlayerDialogue;
-        private VisualElement m_WinScreen; 
+        private VisualElement m_HealthBar;
+        private Label m_CounterLabel;
+        private VisualElement m_DialogueElement;
+        private Label m_DialogueLabel;
+        private VisualElement m_WinScreen;
         private VisualElement m_LoseScreen;
 
-        private Label m_RobotCounter;
-        private float m_TimerDisplay;
+        private float m_TimerDisplay = -1.0f;
 
-        private VisualElement m_Healthbar;
-
-        private Button m_ReturnToMain;
-    
         private void Awake()
         {
+            if (instance != null && instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
             instance = this;
         }
 
-        void Start()
+        private void Start()
         {
             UIDocument uiDocument = GetComponent<UIDocument>();
-            m_Healthbar = uiDocument.rootVisualElement.Q<VisualElement>("Healthbar");
-            SetHealthValue(1.0f);
+            if (uiDocument == null) return;
 
-            m_NonPlayerDialogue = uiDocument.rootVisualElement.Q<VisualElement>("NPCDialogue");
-            m_NonPlayerDialogue.style.display = DisplayStyle.None;
-            m_TimerDisplay = -1.0f;
+            VisualElement root = uiDocument.rootVisualElement;
 
-            m_LoseScreen = uiDocument.rootVisualElement.Q<VisualElement>("LoseScreenContainer");
-            m_WinScreen = uiDocument.rootVisualElement.Q<VisualElement>("WinScreenContainer");
+            m_HealthBar = root.Q<VisualElement>("HealthBar");
+            m_CounterLabel = root.Q<Label>("CounterLabel");
+            m_DialogueElement = root.Q<VisualElement>("NPCDialogue");
+            m_DialogueLabel = root.Q<Label>("DialogueLabel");
+            m_WinScreen = root.Q<VisualElement>("WinScreenContainer");
+            m_LoseScreen = root.Q<VisualElement>("LoseScreenContainer");
 
-            m_RobotCounter = uiDocument.rootVisualElement.Q<Label>("CounterLabel");
-            m_ReturnToMain = uiDocument.rootVisualElement.Q<Button>("ReturnToMain");
-            
-            m_ReturnToMain.clicked += () => { SceneManager.LoadScene(0); };
-        }
-
-        public void SetHealthValue(float percentage)
-        {
-            m_Healthbar.style.width = Length.Percent(100 * percentage);
+            if (m_DialogueElement != null)
+            {
+                m_DialogueElement.style.display = DisplayStyle.None;
+            }
         }
 
         private void Update()
@@ -57,33 +51,54 @@ namespace Beginner2D
             if (m_TimerDisplay > 0)
             {
                 m_TimerDisplay -= Time.deltaTime;
-                if (m_TimerDisplay < 0)
+                if (m_TimerDisplay <= 0)
                 {
-                    m_NonPlayerDialogue.style.display = DisplayStyle.None;
+                    if (m_DialogueElement != null)
+                    {
+                        m_DialogueElement.style.display = DisplayStyle.None;
+                    }
                 }
             }
         }
 
-        public void DisplayDialogue()
+        public void SetHealthValue(float percentage)
         {
-            m_NonPlayerDialogue.style.display = DisplayStyle.Flex;
-            m_TimerDisplay = displayTime;
+            if (m_HealthBar != null)
+            {
+                m_HealthBar.style.width = Length.Percent(percentage * 100);
+            }
+        }
+
+        public void SetCounter(int current, int total)
+        {
+            if (m_CounterLabel != null)
+            {
+                m_CounterLabel.text = $"Полагоджено: {current} / {total}";
+            }
+        }
+
+        public void DisplayDialogue(string text)
+        {
+            if (m_DialogueElement != null && m_DialogueLabel != null)
+            {
+                m_DialogueLabel.text = text;
+                m_DialogueElement.style.display = DisplayStyle.Flex;
+                m_TimerDisplay = 4.0f;
+            }
+            else
+            {
+                Debug.LogWarning("UIHandler: Не знайдено елемент NPCDialogue або DialogueLabel у UXML!");
+            }
         }
 
         public void DisplayWinScreen()
         {
-            m_WinScreen.style.opacity = 1.0f;
+            if (m_WinScreen != null) m_WinScreen.style.opacity = 1;
         }
 
         public void DisplayLoseScreen()
         {
-            m_LoseScreen.style.opacity = 1.0f;
+            if (m_LoseScreen != null) m_LoseScreen.style.opacity = 1;
         }
-    
-        public void SetCounter(int current, int enemies)
-        {
-            m_RobotCounter.text = $"{current} / {enemies}";
-        }
-
     }
 }

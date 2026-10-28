@@ -1,99 +1,72 @@
-using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Beginner2D
 {
-    /// <summary>
-    /// This class is the "glue" between all the system in the game. It's a single entry point to be able to manipulate
-    /// relationship between object. For example, it will find all the enemies in the scene and check if they are fix
-    /// </summary>
     public class GameManager : MonoBehaviour
     {
-        public PlayerController player;
-        Enemy[] enemies;
+        public static GameManager instance { get; private set; }
+        public bool gameOver { get; private set; } = false;
 
-        public UIHandler uiHandler;
-
-        private bool gameEnded = false;
-        int enemiesFixed = 0;
+        private int totalEnemies;
+        private int fixedEnemies = 0;
 
         private void Awake()
         {
-            Physics2D.IgnoreLayerCollision(Helpers.ProjectileLayer, Helpers.ProjectileLayer, true);
-            Physics2D.IgnoreLayerCollision(Helpers.PlayerLayer, Helpers.ProjectileLayer, true);
-            
-            for (int i = 0; i < 32; i++)
-                Physics2D.IgnoreLayerCollision(Helpers.ConfinerLayer, i, true);
-        }
-
-        void Start()
-        {
-            enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
-
-            foreach (var enemy in enemies)
+            if (instance != null && instance != this)
             {
-                enemy.OnFixed += HandleEnemyFixed;
+                Destroy(gameObject);
+                return;
             }
-            uiHandler.SetCounter(0, enemies.Length);
-
-            player.OnTalkedToNPC += HandlePlayerTalkedToNPC;
+            instance = this;
         }
-        
-        void Update()
-        {
-            if (gameEnded) return;
 
-            // Lose condition
-            if (player.health <= 0)
+        private void Start()
+        {
+            EnemyController[] enemies = FindObjectsOfType<EnemyController>();
+            totalEnemies = enemies.Length;
+
+            if (UIHandler.instance != null)
             {
-                gameEnded = true;
-                uiHandler.DisplayLoseScreen();
-                Invoke(nameof(ReloadScene), 3f);
+                UIHandler.instance.SetCounter(fixedEnemies, totalEnemies);
             }
         }
 
-        bool AllEnemiesFixed()
+        public void OnRobotFixed()
         {
-            foreach (Enemy enemy in enemies)
+            if (gameOver) return;
+
+            fixedEnemies++;
+            if (UIHandler.instance != null)
             {
-                if (enemy.isBroken)
-                {
-                    return false;
-                }
+                UIHandler.instance.SetCounter(fixedEnemies, totalEnemies);
             }
-            return true;
-        }
 
-
-        void ReloadScene()
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
-
-        void ReturnToMainMenu()
-        {
-            SceneManager.LoadScene(0);
-        }
-
-        void HandleEnemyFixed()
-        {
-            enemiesFixed++;
-            uiHandler.SetCounter(enemiesFixed, enemies.Length);
-        }
-
-        void HandlePlayerTalkedToNPC()
-        {
-        
-            if (AllEnemiesFixed())
+            if (fixedEnemies >= totalEnemies)
             {
-                uiHandler.DisplayWinScreen();
-                Invoke(nameof(ReturnToMainMenu), 3f);
+                WinGame();
             }
-            else
-            {
-                UIHandler.instance.DisplayDialogue();
-            }
+        }
+
+        public void PlayerDied()
+        {
+            if (gameOver) return;
+
+            gameOver = true;
+            if (UIHandler.instance != null) UIHandler.instance.DisplayLoseScreen();
+            Invoke(nameof(RestartScene), 3.0f);
+        }
+
+        private void WinGame()
+        {
+            gameOver = true;
+            if (UIHandler.instance != null) UIHandler.instance.DisplayWinScreen();
+            Invoke(nameof(RestartScene), 3.0f);
+        }
+
+        private void RestartScene()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }
