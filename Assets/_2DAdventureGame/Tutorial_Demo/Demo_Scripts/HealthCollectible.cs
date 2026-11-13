@@ -10,6 +10,7 @@ namespace Beginner2D
     {
         public AudioClip collectedClip;
         public ParticleSystem pickUpParticleEffect;
+        public int amount = 1;
         void OnTriggerEnter2D(Collider2D other)
         {
             PlayerController controller = other.GetComponent<PlayerController>();
@@ -18,7 +19,7 @@ namespace Beginner2D
             {
                 Instantiate(pickUpParticleEffect, transform.position + Vector3.up * 0.5f, Quaternion.identity);
                 controller.PlaySound(collectedClip);
-                controller.ChangeHealth(1);
+                controller.ChangeHealth(amount);
                 Destroy(gameObject);
             }
         }
