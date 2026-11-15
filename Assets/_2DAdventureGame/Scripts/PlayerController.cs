@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using Beginner2D;
 
 public class PlayerController : MonoBehaviour
@@ -131,9 +132,16 @@ public class PlayerController : MonoBehaviour
             UIHandler.instance.SetHealthValue(currentHealth / (float)maxHealth);
         }
 
-        if (currentHealth <= 0 && GameManager.instance != null)
+        if (currentHealth <= 0)
         {
-            GameManager.instance.PlayerDied();
+            if (GameManager.instance != null)
+            {
+                GameManager.instance.PlayerDied();
+            }
+            else
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
         }
     }
 
